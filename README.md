@@ -10,8 +10,8 @@ This repository extends WENDy with two ways to constrain the coefficients of an 
 - [Constrained Coefficients: the Structure Matrix and the Offset Vector](#constrained-coefficients-the-structure-matrix-and-the-offset-vector)
   - [Weak-form setup](#weak-form-setup)
   - [Dimensions](#dimensions)
-  - [Structure matrix $S$](#structure-matrix-s)
-  - [Offset vector $C$](#offset-vector-c)
+  - [Structure matrix S](#structure-matrix-s)
+  - [Offset vector C](#offset-vector-c)
   - [Supported cases](#supported-cases)
 - [Running the Examples](#running-the-examples)
 - [Repository Structure](#repository-structure)
@@ -27,7 +27,7 @@ The experiments were run using the main branch of `WENDy` as downloaded on April
 
 ## The Example Model
 
-The demonstration uses the fully-mixed two-layer online-offline engagement model. Writing $\mathbf{x}(t) = \big(U(t), E(t), D(t), P(t), R(t)\big)$ for the aggregated population fractions, the deterministic system is
+The demonstration uses the fully-mixed two-layer online-offline engagement model. Writing $\vec{x}(t) = \big(U(t), E(t), D(t), P(t), R(t)\big)$ for the aggregated population fractions, the deterministic system is
 
 $$
 \begin{aligned}
@@ -64,33 +64,39 @@ This system motivates **both features of** this package. First, the coefficient 
 
 ### Weak-form setup
 
-WENDy tests the ODE against compactly supported test functions collected in $\Phi$, with $\dot{\Phi}$ the matrix of their derivatives. With a feature library $\Theta$, the weak-form residual of the unconstrained problem is linear in the coefficient vector. This package replaces that vector by an **affine map**
+Rather than differentiating noisy data, WENDy multiplies the ODE by smooth, compactly supported test functions and integrates by parts, moving the time derivative off the data and onto the test functions. Discretising that operation produces two matrices: $\Phi$, whose rows hold the test functions sampled on the time grid, and $\dot{\Phi}$, holding their derivatives. Write $X$ for the observed trajectory (the $M \times d$ array of $M$ time points by $d$ states, `xobs` in the code) and $\Theta(X)$ for the **feature library**, the $M \times J$ matrix whose columns are the $J$ distinct nonlinear terms appearing anywhere on the right-hand side, evaluated at the data.
+
+In this notation the weak-form residual of the unconstrained problem is linear in the coefficient vector. This package replaces that vector by an **affine map**
 
 $$
-\mathbf{w} = S \boldsymbol{\theta} + C ,
+\vec{w} = S \vec{\theta} + C ,
 $$
 
-where $\boldsymbol{\theta}$ is what actually gets estimated, $S$ encodes dependencies among coefficients, and $C$ holds coefficients that are known in advance. The residual becomes
+where $\vec{w} \in \mathbb{R}^{Jd}$ collects every right-hand-side coefficient of the system, $\vec{\theta} \in \mathbb{R}^{q}$ is the shorter vector that actually gets estimated, $S$ encodes dependencies among coefficients, and $C$ holds coefficients that are known in advance. The residual becomes
 
 $$
-\mathbf{r}(\mathbf{U}, \boldsymbol{\theta}) = \big[\mathbb{I}_d \otimes \big(\Phi \Theta(\mathbf{U})\big)\big]\big(S\boldsymbol{\theta} + C\big) + \mathrm{vec}\big(\dot{\Phi}(\mathbf{U})\big),
+\vec{r}(X, \vec{\theta}) = \big[\mathbb{I}_d \otimes \big(\Phi \Theta(X)\big)\big]\big(S\vec{\theta} + C\big) + \mathrm{vec}\big(\dot{\Phi} X\big),
 $$
 
-so the linear system solved at each iteration is $G \boldsymbol{\theta} = b$ with
+with $\mathbb{I}_d$ the $d \times d$ identity, $\otimes$ the Kronecker product — which applies the same test-function integration to each of the $d$ equations — and $\mathrm{vec}(\cdot)$ the operation stacking a matrix's columns into a single long vector. Setting $\vec{r} = 0$ gives the linear system $G \vec{\theta} = b$ with
 
 $$
 G = \big[\mathbb{I}_d \otimes (\Phi\Theta)\big] S,
 \qquad
-b = - \mathrm{vec}\big(\dot{\Phi} \mathbf{u}\big) - \big[\mathbb{I}_d \otimes (\Phi\Theta)\big] C .
+b = - \mathrm{vec}\big(\dot{\Phi} X\big) - \big[\mathbb{I}_d \otimes (\Phi\Theta)\big] C .
 $$
 
-The covariance factor that WENDy iterates on is built from the **full** coefficient vector, not from $\boldsymbol{\theta}$:
+Note where each ingredient lands: $S$ multiplies into the system matrix, because it says how the unknowns combine, while $C$ is fully known and so is evaluated once and moved to the right-hand side.
+
+Because $X$ carries noise, the residual is correlated and unequally scaled across rows, so least squares on $G\vec{\theta} = b$ is not efficient. WENDy corrects for this by modelling the residual through a covariance factor $L_{\vec{w}}$, which is built from the **full** coefficient vector, not from $\vec{\theta}$:
 
 $$
-L_{\mathbf{w}} = \big[\mathrm{mat}(S\boldsymbol{\theta} + C)^{\top} \otimes \Phi\big] \nabla\Theta P + \big[\mathbb{I}_d \otimes \dot{\Phi}\big],
+L_{\vec{w}} = \big[\mathrm{mat}(S\vec{\theta} + C)^{\top} \otimes \Phi\big] \nabla\Theta \Pi + \big[\mathbb{I}_d \otimes \dot{\Phi}\big],
 \qquad
-\mathbf{r} \sim \mathcal{N}\big(0, \sigma^2 L_{\mathbf{w}} L_{\mathbf{w}}^{\top}\big).
+\vec{r} \sim \mathcal{N}\big(0, \sigma^2 L_{\vec{w}} L_{\vec{w}}^{\top}\big).
 $$
+
+Here $\mathrm{mat}(\cdot)$ inverts $\mathrm{vec}$, reshaping the $Jd$ coefficients back into a $J \times d$ array; $\nabla\Theta$ is the Jacobian of the feature library with respect to the states; $\Pi$ is a fixed permutation aligning the Kronecker index ordering; and $\sigma$ is the noise standard deviation. This factor is what makes the estimator a generalized least squares problem, and it is why $S$ and $C$ have to be resolved before the covariance is formed — the noise propagates through the coefficients that multiply the data, which are $\vec{w}$, not $\vec{\theta}$.
 
 ### Dimensions
 
@@ -105,14 +111,14 @@ $$
 The feature library holds the $J = 4$ distinct nonlinearities appearing anywhere on the right-hand side,
 
 $$
-\Theta(\mathbf{x}) = \big[ U E \big| U P \big| E \big| P \big],
+\Theta(X) = \big[ U E \big| U P \big| E \big| P \big],
 $$
 
-and the full coefficient vector $\mathbf{w} \in \mathbb{R}^{Jd} = \mathbb{R}^{20}$ stacks, for each of the $5$ equations, the coefficient of each of the $4$ features. Most of those $20$ entries are zero, several are equal or opposite, and only $q = 5$ numbers are free.
+and the full coefficient vector $\vec{w} \in \mathbb{R}^{Jd} = \mathbb{R}^{20}$ stacks, for each of the $5$ equations, the coefficient of each of the $4$ features. Most of those $20$ entries are zero, several are equal or opposite, and only $q = 5$ numbers are free.
 
 ### Structure matrix $S$
 
-$S$ maps the $q$ free parameters onto the $Jd$ coefficients. Row $(i-1)J + j$ of $S$ gives the coefficient of feature $j$ in equation $i$, so reading a row against $\boldsymbol{\theta} = (\beta, \theta, \eta, \gamma_i, \gamma_p)^{\top}$ recovers the model above. For this example $S$ is $20 \times 5$:
+$S$ maps the $q$ free parameters onto the $Jd$ coefficients. Row $(i-1)J + j$ of $S$ gives the coefficient of feature $j$ in equation $i$, so reading a row against $\vec{\theta} = (\beta, \theta, \eta, \gamma_i, \gamma_p)^{\top}$ recovers the model above. For this example $S$ is $20 \times 5$:
 
 | equation | feature | β | θ | η | γ<sub>i</sub> | γ<sub>p</sub> |
 | :-- | :-- | :--: | :--: | :--: | :--: | :--: |
@@ -149,7 +155,7 @@ This is implemented in `FullyMixedModel_Structured.m`.
 
 $C$ handles coefficients that are **known a priori and should not be estimated**. Where $S$ says *how* coefficients depend on the free parameters, $C$ says *which parts of the answer are already fixed*. In the linear system above, $C$ contributes a known term that is simply moved to the right-hand side — the same role an offset plays in a generalized linear model.
 
-Suppose the two recovery rates $\gamma_i$ and $\gamma_p$ have been measured independently, so only $\boldsymbol{\theta} = (\beta, \theta, \eta)^{\top}$ remains unknown. Then $S$ shrinks to $20 \times 3$ — its $\gamma_i$ and $\gamma_p$ columns are dropped — and their contributions reappear in $C$:
+Suppose the two recovery rates $\gamma_i$ and $\gamma_p$ have been measured independently, so only $\vec{\theta} = (\beta, \theta, \eta)^{\top}$ remains unknown. Then $S$ shrinks to $20 \times 3$ — its $\gamma_i$ and $\gamma_p$ columns are dropped — and their contributions reappear in $C$:
 
 | equation | feature | *C* entry |
 | :-- | :-- | :--: |
@@ -158,7 +164,7 @@ Suppose the two recovery rates $\gamma_i$ and $\gamma_p$ have been measured inde
 | d*P*/d*t* | *P* | −γ<sub>p</sub> |
 | d*R*/d*t* | *P* | +γ<sub>p</sub> |
 
-with every other entry zero. Row $(\dot{E}, E)$ then reads $S_{(\dot{E},E)}\boldsymbol{\theta} + C_{(\dot{E},E)} = -\eta - \gamma_i$, reproducing the original coefficient exactly. This is implemented in `FullyMixedModel_Structured_with_Offset.m`.
+with every other entry zero. Row $(\dot{E}, E)$ then reads $S_{(\dot{E},E)}\vec{\theta} + C_{(\dot{E},E)} = -\eta - \gamma_i$, reproducing the original coefficient exactly. This is implemented in `FullyMixedModel_Structured_with_Offset.m`.
 
 **$S$ cannot absorb $C$.** The range of $S$ is a linear subspace and therefore always contains the origin, whereas a nonzero $C$ is a translation off that subspace; no choice of $S$ produces it. The only workaround is homogeneous coordinates — append $C$ as an extra column of $S$ and pin its parameter to $1$ — but pinning a parameter to a known value *is* the offset feature. $S$ and $C$ are the homogeneous and inhomogeneous halves of one affine map, and neither subsumes the other.
 
@@ -203,7 +209,7 @@ InferPars_WithNoise_Structured_with_Offset   % S and C, with noise
 
 Each script prints the estimated against the true parameters and produces the nine-panel WENDy diagnostic figure. The toggles `save_results`, `write_to_txt`, `save_fig` and `write_to_csv` near the top of each script control whether results, logs and figures are written to disk; the output folders are created automatically on first run.
 
-The diagnostic figure follows the original WENDy code: the same nine panels, showing the iterate errors, confidence bounds, Shapiro–Wilk *p*-values, the data against the learned dynamics, the residual decomposition, and the Fourier content of the data and test functions. The panels here are adapted to the constrained setting — starred quantities account for the offset vector $C$, and the Jacobian is evaluated at the full coefficient vector $S\boldsymbol{\theta} + C$ — but the layout and the diagnostics themselves are unchanged, so the figure can be read exactly as in the original.
+The diagnostic figure follows the original WENDy code: the same nine panels, showing the iterate errors, confidence bounds, Shapiro–Wilk *p*-values, the data against the learned dynamics, the residual decomposition, and the Fourier content of the data and test functions. The panels here are adapted to the constrained setting — starred quantities account for the offset vector $C$, and the Jacobian is evaluated at the full coefficient vector $S\vec{\theta} + C$ — but the layout and the diagnostics themselves are unchanged, so the figure can be read exactly as in the original.
 
 **Noise convention.** In `Driver_noisy.m` the variable `sigma` is the *noise ratio*: the standard deviation of the additive Gaussian noise expressed as a fraction of each state's RMS amplitude,
 
@@ -221,7 +227,7 @@ It is dimensionless, and $\sigma_X$ is computed separately for each state variab
 ## Repository Structure
 
 **`src/`** holds the core code: the WENDy solver and the weak-form machinery it depends on.
-The entry point is `wendy_fcn.m`, which implements the constrained coefficient map $\mathbf{w} = S\boldsymbol{\theta} + C$ described below. Solver defaults live in `wendy_snf_params.m`, and the two `display_wendy_results_*.m` scripts build the diagnostic figure. The remaining files are test-function construction, covariance factors and utilities. Every file carries the original WENDy copyright header. Six files carry the constrained coefficient map and are listed in `src/README.md`; elsewhere there are only small bug fixes and cosmetic changes that leave the main functionality intact, each noted in the file header and commented at the point of the change.
+The entry point is `wendy_fcn.m`, which implements the constrained coefficient map $\vec{w} = S\vec{\theta} + C$ described below. Solver defaults live in `wendy_snf_params.m`, and the two `display_wendy_results_*.m` scripts build the diagnostic figure. The remaining files are test-function construction, covariance factors and utilities. Every file carries the original WENDy copyright header. Six files carry the constrained coefficient map and are listed in `src/README.md`; elsewhere there are only small bug fixes and cosmetic changes that leave the main functionality intact, each noted in the file header and commented at the point of the change.
 
 **`Generate_Data/`** produces the synthetic data the demos consume, and must be run first. `FullyMixedModel_ODE.m` is the right-hand side of the model, while `Driver.m` and `Driver_noisy.m` simulate clean and noisy trajectories respectively and save them to `Generate_Data/data/`.
 
