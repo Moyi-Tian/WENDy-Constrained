@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+
+# MATLAB autosave / temp
+*.asv
+*.m~
+slprj/
+
+# Generated data — recreate with Generate_Data/Driver.m and Driver_noisy.m
+Generate_Data/data/
+
+# Run outputs
+inference_results/
+figures/
+*.csv
+results_*.txt

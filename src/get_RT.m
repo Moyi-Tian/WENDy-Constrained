@@ -1,0 +1,18 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%% WENDy: covariance-corrected ODE parameter estimation
+%%%%%%%%%%%% Copyright 2023, All Rights Reserved
+%%%%%%%%%%%% Code by Daniel Ames Messenger
+%%%%%%%%%%%%
+%%%%%%%%%%%% Modified 2026 by Moyi Tian for WENDy-Constrained:
+%%%%%%%%%%%%   removed a duplicated chol() call (the same factorization was
+%%%%%%%%%%%%   computed twice per iteration and the first result discarded).
+
+function [RT,L0,Cov,diag_reg] = get_RT(L0,L1,w,diag_reg)
+    dims = size(L1);
+    if ~all(~w)
+        L0 = L0 + reshape(reshape(permute(L1,[3 1 2]),dims(3),[]).'*w,dims(1),[]);
+    end
+    Cov = L0*(L0');
+    RT = chol((1-diag_reg)*Cov+diag_reg*eye(size(Cov)));
+    RT = RT';
+end

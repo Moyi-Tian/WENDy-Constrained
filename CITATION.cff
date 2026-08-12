@@ -1,0 +1,51 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: WENDy-Constrained
+abstract: "Weak-form parameter estimation (WENDy) extended with a structure matrix and an offset vector, so that the coefficients of an ODE system can be tied together, fixed to known values, or both. Demonstrated on the fully-mixed two-layer online-offline engagement model."
+type: software
+authors:
+  - family-names: Tian
+    given-names: Moyi
+    orcid: "https://orcid.org/0000-0001-8166-7410"
+    affiliation: "Department of Applied Mathematics, University of Colorado Boulder"
+repository-code: "https://github.com/Moyi-Tian/WENDy-Constrained"
+url: "https://github.com/Moyi-Tian/WENDy-Constrained"
+keywords:
+  - WENDy
+  - weak form
+  - parameter estimation
+  - inverse problems
+  - ordinary differential equations
+  - structure matrix
+  - MATLAB
+references:
+  - type: article
+    title: "Direct Estimation of Parameters in ODE Models Using WENDy: Weak-Form Estimation of Nonlinear Dynamics"
+    authors:
+      - family-names: Bortz
+        given-names: David M.
+      - family-names: Messenger
+        given-names: Daniel A.
+      - family-names: Dukic
+        given-names: Vanja
+    journal: Bulletin of Mathematical Biology
+    volume: 85
+    year: 2023
+    doi: 10.1007/s11538-023-01208-6
+  - type: article
+    title: "Modelling the spillover from online engagement to offline protest: stochastic dynamics and mean-field approximations on networks"
+    authors:
+      - family-names: Tian
+        given-names: Moyi
+        orcid: "https://orcid.org/0000-0001-8166-7410"
+      - family-names: Brantingham
+        given-names: P. Jeffrey
+        orcid: "https://orcid.org/0000-0003-1079-0053"
+      - family-names: Rodríguez
+        given-names: Nancy
+        orcid: "https://orcid.org/0000-0003-1023-9659"
+    journal: Journal of Complex Networks
+    volume: 14
+    issue: 2
+    year: 2026
+    doi: 10.1093/comnet/cnaf057
