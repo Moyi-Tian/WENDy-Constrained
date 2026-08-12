@@ -73,9 +73,7 @@ $$
 where $\boldsymbol{\theta}$ is what actually gets estimated, $S$ encodes dependencies among coefficients, and $C$ holds coefficients that are known in advance. The residual becomes
 
 $$
-\mathbf{r}(\mathbf{U}, \boldsymbol{\theta})
- = \big[\mathbb{I}_d \otimes \big(\Phi \Theta(\mathbf{U})\big)\big]\big(S\boldsymbol{\theta} + C\big)
- + \mathrm{vec}\big(\dot{\Phi}(\mathbf{U})\big),
+\mathbf{r}(\mathbf{U}, \boldsymbol{\theta}) = \big[\mathbb{I}_d \otimes \big(\Phi \Theta(\mathbf{U})\big)\big]\big(S\boldsymbol{\theta} + C\big) + \mathrm{vec}\big(\dot{\Phi}(\mathbf{U})\big),
 $$
 
 so the linear system solved at each iteration is $G \boldsymbol{\theta} = b$ with
@@ -89,8 +87,7 @@ $$
 The covariance factor that WENDy iterates on is built from the **full** coefficient vector, not from $\boldsymbol{\theta}$:
 
 $$
-L_{\mathbf{w}} = \big[\mathrm{mat}(S\boldsymbol{\theta} + C)^{\top} \otimes \Phi\big] \nabla\Theta P
- + \big[\mathbb{I}_d \otimes \dot{\Phi}\big],
+L_{\mathbf{w}} = \big[\mathrm{mat}(S\boldsymbol{\theta} + C)^{\top} \otimes \Phi\big] \nabla\Theta P + \big[\mathbb{I}_d \otimes \dot{\Phi}\big],
 \qquad
 \mathbf{r} \sim \mathcal{N}\big(0, \sigma^2 L_{\mathbf{w}} L_{\mathbf{w}}^{\top}\big).
 $$
@@ -177,6 +174,7 @@ Both matrices are optional. Pass `[]` for either one and `src/wendy_fcn.m` fills
 | given | `[]` | **w** = *S*θ | structured only |
 | `[]` | given | **w** = θ + *C* | known offsets only |
 | given | given | **w** = *S*θ + *C* | both |
+
 The resolved `S` and `C` are returned as outputs, so downstream diagnostics never have to re-derive them.
 
 
