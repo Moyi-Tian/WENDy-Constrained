@@ -28,33 +28,34 @@ The experiments were run using the main branch of `WENDy` as downloaded on April
 ## The Example Model
 
 The demonstration uses the fully-mixed two-layer online-offline engagement model. Writing $\mathbf{x}(t) = \big(U(t), E(t), D(t), P(t), R(t)\big)$ for the aggregated population fractions, the deterministic system is
+
 $$
 \begin{aligned}
-\frac{dU}{dt} &= -\beta U E - \theta U P, \\[2pt]
-\frac{dE}{dt} &= \beta U E + \theta U P - (\eta + \gamma_i) E, \\[2pt]
-\frac{dD}{dt} &= (\eta + \gamma_i) E, \\[2pt]
-\frac{dP}{dt} &= \eta E - \gamma_p P, \\[2pt]
+\frac{dU}{dt} &= -\beta U E - \theta U P, \\
+\frac{dE}{dt} &= \beta U E + \theta U P - (\eta + \gamma_i) E, \\
+\frac{dD}{dt} &= (\eta + \gamma_i) E, \\
+\frac{dP}{dt} &= \eta E - \gamma_p P, \\
 \frac{dR}{dt} &= \gamma_p P,
 \end{aligned}
 $$
 
 with $U, E, D, P, R \in [0,1]$.
 
-| state | meaning                           |
-| :---- | :-------------------------------- |
-| $U$   | not engaged / uninterested online |
-| $E$   | engaged online                    |
-| $D$   | done engaging / disengaged online |
-| $P$   | participating offline             |
-| $R$   | done participating offline        |
+| state | meaning |
+| :-- | :-- |
+| *U* | not engaged / uninterested online |
+| *E* | engaged online |
+| *D* | done engaging / disengaged online |
+| *P* | participating offline |
+| *R* | done participating offline |
 
-| parameter  | meaning                                                      |
-| :--------- | :----------------------------------------------------------- |
-| $\beta$    | transmission rate online, $U \to E$                          |
-| $\theta$   | transmission rate from offline participation feedback, $U \to E$ |
-| $\eta$     | spillover rate from online engagement to offline participation, $E \to P$ |
-| $\gamma_i$ | recovery rate online, $E \to D$                              |
-| $\gamma_p$ | recovery rate offline, $P \to R$                             |
+| parameter | meaning |
+| :-- | :-- |
+| β | transmission rate online, *U* → *E* |
+| θ | transmission rate from offline participation feedback, *U* → *E* |
+| η | spillover rate from online engagement to offline participation, *E* → *P* |
+| γ<sub>i</sub> | recovery rate online, *E* → *D* |
+| γ<sub>p</sub> | recovery rate offline, *P* → *R* |
 
 This system motivates **both features of** this package. First, the coefficient $-(\eta + \gamma_i)$ appears as a **sum**, so the same two parameters are tied together across the $\dot{E}$ and $\dot{D}$ equations. Second, several coefficients are related by sign or shared outright between equations, because mass leaving one compartment must enter another. An unconstrained solver cannot see any of that — **hence the structure matrix**. Lastly, as is common in epidemiological models, a practical situation is that some parameters are known while others are to be inferred from data — **as in one of the demos below, where the recovery rates are treated as known. This is what the offset vector provides for.**
 
@@ -66,77 +67,78 @@ This system motivates **both features of** this package. First, the coefficient 
 WENDy tests the ODE against compactly supported test functions collected in $\Phi$, with $\dot{\Phi}$ the matrix of their derivatives. With a feature library $\Theta$, the weak-form residual of the unconstrained problem is linear in the coefficient vector. This package replaces that vector by an **affine map**
 
 $$
-\mathbf{w} \;=\; S\,\boldsymbol{\theta} \;+\; C ,
+\mathbf{w} = S \boldsymbol{\theta} + C ,
 $$
 
 where $\boldsymbol{\theta}$ is what actually gets estimated, $S$ encodes dependencies among coefficients, and $C$ holds coefficients that are known in advance. The residual becomes
 
 $$
 \mathbf{r}(\mathbf{U}, \boldsymbol{\theta})
-\;=\; \big[\mathbb{I}_d \otimes \big(\Phi\,\Theta(\mathbf{U})\big)\big]\big(S\boldsymbol{\theta} + C\big)
-\;+\; \mathrm{vec}\big(\dot{\Phi}(\mathbf{U})\big),
+ = \big[\mathbb{I}_d \otimes \big(\Phi \Theta(\mathbf{U})\big)\big]\big(S\boldsymbol{\theta} + C\big)
+ + \mathrm{vec}\big(\dot{\Phi}(\mathbf{U})\big),
 $$
 
-so the linear system solved at each iteration is $G\,\boldsymbol{\theta} = b$ with
+so the linear system solved at each iteration is $G \boldsymbol{\theta} = b$ with
 
 $$
-G \;=\; \big[\mathbb{I}_d \otimes (\Phi\Theta)\big]\,S,
+G = \big[\mathbb{I}_d \otimes (\Phi\Theta)\big] S,
 \qquad
-b \;=\; -\,\mathrm{vec}\big(\dot{\Phi}\,\mathbf{u}\big) \;-\; \big[\mathbb{I}_d \otimes (\Phi\Theta)\big]\,C .
+b = - \mathrm{vec}\big(\dot{\Phi} \mathbf{u}\big) - \big[\mathbb{I}_d \otimes (\Phi\Theta)\big] C .
 $$
 
 The covariance factor that WENDy iterates on is built from the **full** coefficient vector, not from $\boldsymbol{\theta}$:
 
 $$
-L_{\mathbf{w}} \;=\; \big[\mathrm{mat}(S\boldsymbol{\theta} + C)^{\!\top} \otimes \Phi\big]\,\nabla\Theta\,P
-\;+\; \big[\mathbb{I}_d \otimes \dot{\Phi}\big],
+L_{\mathbf{w}} = \big[\mathrm{mat}(S\boldsymbol{\theta} + C)^{\top} \otimes \Phi\big] \nabla\Theta P
+ + \big[\mathbb{I}_d \otimes \dot{\Phi}\big],
 \qquad
-\mathbf{r} \sim \mathcal{N}\!\big(0,\; \sigma^2 L_{\mathbf{w}} L_{\mathbf{w}}^{\!\top}\big).
+\mathbf{r} \sim \mathcal{N}\big(0, \sigma^2 L_{\mathbf{w}} L_{\mathbf{w}}^{\top}\big).
 $$
 
 ### Dimensions
 
-| symbol | meaning                                            |  value for this example   |
-| :----- | :------------------------------------------------- | :-----------------------: |
-| $d$    | number of states (= number of equations)           |            $5$            |
-| $J$    | number of distinct features in $\Theta$            |            $4$            |
-| $q$    | number of weights to learn                         | $5$ (or $3$ with offsets) |
-| $S$    | structure matrix, $S \in \mathbb{R}^{Jd \times q}$ |       $20 \times 5$       |
-| $C$    | offset vector, $C \in \mathbb{R}^{Jd \times 1}$    |       $20 \times 1$       |
+| symbol | meaning | value for this example |
+| :-- | :-- | :--: |
+| *d* | number of states (= number of equations) | 5 |
+| *J* | number of distinct features in Θ | 4 |
+| *q* | number of weights to learn | 5 (or 3 with offsets) |
+| *S* | structure matrix, *Jd* × *q* | 20 × 5 |
+| *C* | offset vector, *Jd* × 1 | 20 × 1 |
 
 The feature library holds the $J = 4$ distinct nonlinearities appearing anywhere on the right-hand side,
+
 $$
-\Theta(\mathbf{x}) \;=\; \big[\; U E \;\big|\; U P \;\big|\; E \;\big|\; P \;\big],
+\Theta(\mathbf{x}) = \big[ U E \big| U P \big| E \big| P \big],
 $$
 
 and the full coefficient vector $\mathbf{w} \in \mathbb{R}^{Jd} = \mathbb{R}^{20}$ stacks, for each of the $5$ equations, the coefficient of each of the $4$ features. Most of those $20$ entries are zero, several are equal or opposite, and only $q = 5$ numbers are free.
 
 ### Structure matrix $S$
 
-$S$ maps the $q$ free parameters onto the $Jd$ coefficients. Row $(i-1)J + j$ of $S$ gives the coefficient of feature $j$ in equation $i$, so reading a row against $\boldsymbol{\theta} = (\beta, \theta, \eta, \gamma_i, \gamma_p)^{\!\top}$ recovers the model above. For this example $S$ is $20 \times 5$:
+$S$ maps the $q$ free parameters onto the $Jd$ coefficients. Row $(i-1)J + j$ of $S$ gives the coefficient of feature $j$ in equation $i$, so reading a row against $\boldsymbol{\theta} = (\beta, \theta, \eta, \gamma_i, \gamma_p)^{\top}$ recovers the model above. For this example $S$ is $20 \times 5$:
 
-| equation  | feature | $\beta$ | $\theta$ | $\eta$ | $\gamma_i$ | $\gamma_p$ |
-| :-------- | :------ | :-----: | :------: | :----: | :--------: | :--------: |
-| $\dot{U}$ | $UE$    |  $-1$   |   $0$    |  $0$   |    $0$     |    $0$     |
-|           | $UP$    |   $0$   |   $-1$   |  $0$   |    $0$     |    $0$     |
-|           | $E$     |   $0$   |   $0$    |  $0$   |    $0$     |    $0$     |
-|           | $P$     |   $0$   |   $0$    |  $0$   |    $0$     |    $0$     |
-| $\dot{E}$ | $UE$    |   $1$   |   $0$    |  $0$   |    $0$     |    $0$     |
-|           | $UP$    |   $0$   |   $1$    |  $0$   |    $0$     |    $0$     |
-|           | $E$     |   $0$   |   $0$    |  $-1$  |    $-1$    |    $0$     |
-|           | $P$     |   $0$   |   $0$    |  $0$   |    $0$     |    $0$     |
-| $\dot{D}$ | $UE$    |   $0$   |   $0$    |  $0$   |    $0$     |    $0$     |
-|           | $UP$    |   $0$   |   $0$    |  $0$   |    $0$     |    $0$     |
-|           | $E$     |   $0$   |   $0$    |  $1$   |    $1$     |    $0$     |
-|           | $P$     |   $0$   |   $0$    |  $0$   |    $0$     |    $0$     |
-| $\dot{P}$ | $UE$    |   $0$   |   $0$    |  $0$   |    $0$     |    $0$     |
-|           | $UP$    |   $0$   |   $0$    |  $0$   |    $0$     |    $0$     |
-|           | $E$     |   $0$   |   $0$    |  $1$   |    $0$     |    $0$     |
-|           | $P$     |   $0$   |   $0$    |  $0$   |    $0$     |    $-1$    |
-| $\dot{R}$ | $UE$    |   $0$   |   $0$    |  $0$   |    $0$     |    $0$     |
-|           | $UP$    |   $0$   |   $0$    |  $0$   |    $0$     |    $0$     |
-|           | $E$     |   $0$   |   $0$    |  $0$   |    $0$     |    $0$     |
-|           | $P$     |   $0$   |   $0$    |  $0$   |    $0$     |    $1$     |
+| equation | feature | β | θ | η | γ<sub>i</sub> | γ<sub>p</sub> |
+| :-- | :-- | :--: | :--: | :--: | :--: | :--: |
+| d*U*/d*t* | *UE* | -1 | 0 | 0 | 0 | 0 |
+|  | *UP* | 0 | -1 | 0 | 0 | 0 |
+|  | *E* | 0 | 0 | 0 | 0 | 0 |
+|  | *P* | 0 | 0 | 0 | 0 | 0 |
+| d*E*/d*t* | *UE* | 1 | 0 | 0 | 0 | 0 |
+|  | *UP* | 0 | 1 | 0 | 0 | 0 |
+|  | *E* | 0 | 0 | -1 | -1 | 0 |
+|  | *P* | 0 | 0 | 0 | 0 | 0 |
+| d*D*/d*t* | *UE* | 0 | 0 | 0 | 0 | 0 |
+|  | *UP* | 0 | 0 | 0 | 0 | 0 |
+|  | *E* | 0 | 0 | 1 | 1 | 0 |
+|  | *P* | 0 | 0 | 0 | 0 | 0 |
+| d*P*/d*t* | *UE* | 0 | 0 | 0 | 0 | 0 |
+|  | *UP* | 0 | 0 | 0 | 0 | 0 |
+|  | *E* | 0 | 0 | 1 | 0 | 0 |
+|  | *P* | 0 | 0 | 0 | 0 | -1 |
+| d*R*/d*t* | *UE* | 0 | 0 | 0 | 0 | 0 |
+|  | *UP* | 0 | 0 | 0 | 0 | 0 |
+|  | *E* | 0 | 0 | 0 | 0 | 0 |
+|  | *P* | 0 | 0 | 0 | 0 | 1 |
 
 Three things this encodes that an unconstrained fit cannot:
 
@@ -150,14 +152,14 @@ This is implemented in `FullyMixedModel_Structured.m`.
 
 $C$ handles coefficients that are **known a priori and should not be estimated**. Where $S$ says *how* coefficients depend on the free parameters, $C$ says *which parts of the answer are already fixed*. In the linear system above, $C$ contributes a known term that is simply moved to the right-hand side — the same role an offset plays in a generalized linear model.
 
-Suppose the two recovery rates $\gamma_i$ and $\gamma_p$ have been measured independently, so only $\boldsymbol{\theta} = (\beta, \theta, \eta)^{\!\top}$ remains unknown. Then $S$ shrinks to $20 \times 3$ — its $\gamma_i$ and $\gamma_p$ columns are dropped — and their contributions reappear in $C$:
+Suppose the two recovery rates $\gamma_i$ and $\gamma_p$ have been measured independently, so only $\boldsymbol{\theta} = (\beta, \theta, \eta)^{\top}$ remains unknown. Then $S$ shrinks to $20 \times 3$ — its $\gamma_i$ and $\gamma_p$ columns are dropped — and their contributions reappear in $C$:
 
-| equation  | feature |  $C$ entry  |
-| :-------- | :------ | :---------: |
-| $\dot{E}$ | $E$     | $-\gamma_i$ |
-| $\dot{D}$ | $E$     | $+\gamma_i$ |
-| $\dot{P}$ | $P$     | $-\gamma_p$ |
-| $\dot{R}$ | $P$     | $+\gamma_p$ |
+| equation | feature | *C* entry |
+| :-- | :-- | :--: |
+| d*E*/d*t* | *E* | −γ<sub>i</sub> |
+| d*D*/d*t* | *E* | +γ<sub>i</sub> |
+| d*P*/d*t* | *P* | −γ<sub>p</sub> |
+| d*R*/d*t* | *P* | +γ<sub>p</sub> |
 
 with every other entry zero. Row $(\dot{E}, E)$ then reads $S_{(\dot{E},E)}\boldsymbol{\theta} + C_{(\dot{E},E)} = -\eta - \gamma_i$, reproducing the original coefficient exactly. This is implemented in `FullyMixedModel_Structured_with_Offset.m`.
 
@@ -169,13 +171,12 @@ Fixing a parameter is also not merely a smaller problem. Because $\eta$ and $\ga
 
 Both matrices are optional. Pass `[]` for either one and `src/wendy_fcn.m` fills in the default — the identity for $S$, the zero vector for $C$ — so all four cases run through a single code path.
 
-|  `S`  |  `C`  | $\mathbf{w}$                            | meaning                             |
-| :---: | :---: | :-------------------------------------- | :---------------------------------- |
-| `[]`  | `[]`  | $\mathbf{w} = \boldsymbol{\theta}$      | plain WENDy: every coefficient free |
-| given | `[]`  | $\mathbf{w} = S\boldsymbol{\theta}$     | structured only                     |
-| `[]`  | given | $\mathbf{w} = \boldsymbol{\theta} + C$  | known offsets only                  |
-| given | given | $\mathbf{w} = S\boldsymbol{\theta} + C$ | both                                |
-
+| `S` | `C` | **w** | meaning |
+| :--: | :--: | :-- | :-- |
+| `[]` | `[]` | **w** = θ | plain WENDy: every coefficient free |
+| given | `[]` | **w** = *S*θ | structured only |
+| `[]` | given | **w** = θ + *C* | known offsets only |
+| given | given | **w** = *S*θ + *C* | both |
 The resolved `S` and `C` are returned as outputs, so downstream diagnostics never have to re-derive them.
 
 
@@ -197,22 +198,23 @@ InferPars_WithNoise_Structured_with_Offset   % S and C, with noise
 
 | demo | estimates | noise |
 | :-- | :-- | :-- |
-| `InferPars_NoNoise_Structured` | $\beta, \theta, \eta, \gamma_i, \gamma_p$ | none |
-| `InferPars_NoNoise_Structured_with_Offset` | $\beta, \theta, \eta$ | none |
-| `InferPars_WithNoise_Structured` | $\beta, \theta, \eta, \gamma_i, \gamma_p$ | $\sigma_{NR} = 0.05$ |
-| `InferPars_WithNoise_Structured_with_Offset` | $\beta, \theta, \eta$ | $\sigma_{NR} = 0.05$ |
+| `InferPars_NoNoise_Structured` | β, θ, η, γ<sub>i</sub>, γ<sub>p</sub> | none |
+| `InferPars_NoNoise_Structured_with_Offset` | β, θ, η | none |
+| `InferPars_WithNoise_Structured` | β, θ, η, γ<sub>i</sub>, γ<sub>p</sub> | σ<sub>NR</sub> = 0.05 |
+| `InferPars_WithNoise_Structured_with_Offset` | β, θ, η | σ<sub>NR</sub> = 0.05 |
 
 Each script prints the estimated against the true parameters and produces the nine-panel WENDy diagnostic figure. The toggles `save_results`, `write_to_txt`, `save_fig` and `write_to_csv` near the top of each script control whether results, logs and figures are written to disk; the output folders are created automatically on first run.
 
 The diagnostic figure follows the original WENDy code: the same nine panels, showing the iterate errors, confidence bounds, Shapiro–Wilk *p*-values, the data against the learned dynamics, the residual decomposition, and the Fourier content of the data and test functions. The panels here are adapted to the constrained setting — starred quantities account for the offset vector $C$, and the Jacobian is evaluated at the full coefficient vector $S\boldsymbol{\theta} + C$ — but the layout and the diagnostics themselves are unchanged, so the figure can be read exactly as in the original.
 
 **Noise convention.** In `Driver_noisy.m` the variable `sigma` is the *noise ratio*: the standard deviation of the additive Gaussian noise expressed as a fraction of each state's RMS amplitude,
+
 $$
 X_{\text{noisy}}(t_m) = X_{\text{true}}(t_m) + \varepsilon_m,
 \qquad
 \varepsilon_m \overset{iid}{\sim} \mathcal{N}(0, \sigma_X^2),
 \qquad
-\sigma_X = \sigma_{NR}\,\mathrm{RMS}(X_{\text{true}}).
+\sigma_X = \sigma_{NR} \mathrm{RMS}(X_{\text{true}}).
 $$
 
 It is dimensionless, and $\sigma_X$ is computed separately for each state variable, so every component is perturbed relative to its own amplitude.
