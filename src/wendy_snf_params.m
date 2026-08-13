@@ -23,7 +23,7 @@ phi_eta = 9;
 phifuns = {@(x) exp(-phi_eta*(1-x.^2).^(-1)), @(x) (1-x.^2).^phi_eta};
 center_scheme = 'uni';
 toggle_VVp_svd = NaN; % 0, no SVD reduction; in (0,1), truncates Frobenious norm; NaN, truncates SVD according to cornerpoint of cumulative sum of singular values
-% NB: this truncates the TEST-FUNCTION basis (V depends on tobs and the radii,
+% Note: this truncates the TEST-FUNCTION basis (V depends on tobs and the radii,
 % not on xobs), so it is a basis-conditioning setting, not a noise filter.
 % Stacking several radii makes the basis highly redundant; keep NaN for every
 % noise level so the sigma_NR -> 0 case is the same estimator as the rest.

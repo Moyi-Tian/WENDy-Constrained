@@ -30,13 +30,16 @@ function [w_hat,res,res_0,w_hat_its,V_cell,Vp_cell,...
 %
 % Both are OPTIONAL. Pass [] for either:
 %
-%   S = [],  C = []   ->  plain WENDy: every coefficient free
+%   S = [],  C = []   ->  every entry of w free (all numeq*numel(features))
 %   S = S,   C = []   ->  structured only
 %   S = [],  C = C    ->  known offsets only
 %   S = S,   C = C    ->  both
 %
 % S defaults to the identity and C to the zero vector, so all four cases run
-% through one code path. The resolved S and C are returned as outputs so
+% through one code path. Note that S = [] is NOT the original WENDy: the identity
+% gives every equation the full feature library. To recover the original, pass an
+% S holding one column per (equation, feature) pair that appears in the model,
+% each with a single 1 in that row. The resolved S and C are returned as outputs so
 % downstream display scripts never have to re-derive them.
 
     %%% get dimensions

@@ -48,7 +48,7 @@ xobs = X_noisy;  % WENDy sees the noisy trajectories
 
 subsamp = 1; % subsample data in time
 
-xsub = X(1:subsamp:end,:);         % clean reference trajectory, for diagnostics only
+xsub = X(1:subsamp:end,:);         % noise-free reference trajectory, for diagnostics only
 noise = noise(1:subsamp:end,:);    % noise realization, needed by the with-noise display script
 [M,nstates] = size(xsub);
 x0 = xsub(1,:)';

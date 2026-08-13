@@ -5,7 +5,8 @@
 %%%%%%%%%%%%
 %%%%%%%%%%%% Small bug fix applied for WENDy-Constrained; structure unchanged.
 %%%%%%%%%%%% This file also defines a local getcorner that shadows getcorner.m;
-%%%%%%%%%%%% see the note at the call site. Upstream behaviour, left intact.
+%%%%%%%%%%%% see the comment above the getcorner call below. Upstream behavior,
+%%%%%%%%%%%% left intact.
 
 function [V,Vp] = VVp_svd(V,K_min,t,toggle_VVp_svd)
     m = length(t);
@@ -22,11 +23,13 @@ function [V,Vp] = VVp_svd(V,K_min,t,toggle_VVp_svd)
         end
     else
         corner_data = cumsum(sings)/sum(sings);
-        % NB: this resolves to the LOCAL getcorner at the bottom of this file,
+        % Note: this resolves to the LOCAL getcorner at the bottom of this file,
         % not to getcorner.m, because MATLAB prefers a local function. The two
         % score the corner differently (local: relative l1; getcorner.m:
-        % relative l2), so the criterion depends on the caller. Upstream
-        % behaviour, left as is: changing it would move the truncation point.
+        % relative l2), so which rule applies depends on where the call is
+        % written -- VVp_svd.m gets the local copy, while findcornerpts.m and
+        % rad_select.m get getcorner.m. Upstream behavior, left as is: changing
+        % it would move the truncation point.
         s = getcorner(corner_data,(1:length(corner_data))');
         s = min(max(K_min,s),size(V,1));
 %         plot(1:length(corner_data),corner_data,s,corner_data(s),'o'); drawnow

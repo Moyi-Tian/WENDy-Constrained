@@ -4,7 +4,7 @@
 %%%%%%%%%%%% Code by Daniel Ames Messenger
 %%%%%%%%%%%%
 %%%%%%%%%%%% Adapted 2026 by Moyi Tian from display_wendy_results.m:
-%%%%%%%%%%%%   starred quantities built from the clean library Theta_cell_true and
+%%%%%%%%%%%%   starred quantities built from the noise-free library Theta_cell_true and
 %%%%%%%%%%%%   corrected for the known-offset vector C; confidence bounds drawn with
 %%%%%%%%%%%%   errorbar rather than unparented rectangle/line primitives.
 
@@ -35,7 +35,7 @@ Theta_big_true = blkdiag(Theta_mat_pre_true{:});
 
 G_0_true = V_big*Theta_big_true*S;
 
-% Known-offset contribution evaluated on clean data. b_0 returned by
+% Known-offset contribution evaluated on noise-free data. b_0 returned by
 % wendy_fcn already has its own C_0 subtracted, so b_0_true needs the
 % matching term to stay comparable.
 C_0_true  = V_big*Theta_big_true*C;

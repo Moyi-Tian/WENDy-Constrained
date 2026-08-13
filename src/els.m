@@ -12,8 +12,9 @@ function w=els(G,b,batch_size,num_runs,meth)
         inds = randperm(K,floor(K/batch_size));
         W(:,rr) = G(inds,:) \ b(inds);
     end
-    % w was only assigned inside the two branches, so an unrecognised meth
-    % failed with "Output argument w is not assigned" instead of saying why.
+    % w was only assigned inside the two branches, so an unrecognized meth
+    % returned "Output argument w is not assigned", which does not identify
+    % the option as the cause.
     if isequal(meth,'median')
         w = median(W,2);
     elseif isequal(meth,'mean')

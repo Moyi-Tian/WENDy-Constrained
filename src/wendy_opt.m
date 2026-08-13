@@ -38,8 +38,8 @@ function w = wendy_opt(G,b,varargin)   % was: windy_opt, a typo; MATLAB
     cov = inp.Results.cov;
 
     % Reject an unknown meth up front. Previously w was only assigned inside the
-    % branches below, so a bad option failed with "Output argument w is not
-    % assigned" rather than naming the actual problem.
+    % branches below, so an unrecognized option returned "Output argument w is
+    % not assigned", which does not identify the option as the cause.
     if ~any(strcmp(meth,{'LS','TLS','ensLS'}))
         error('wendy_opt:badMeth', ...
             'Unknown ''meth'' option ''%s''. Use ''LS'', ''TLS'' or ''ensLS''.',meth);
