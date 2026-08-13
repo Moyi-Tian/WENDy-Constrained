@@ -19,10 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-The files in src/ derive from the WENDy implementation at
-https://github.com/MathBioCU/WENDy, Copyright (c) 2023 David M. Bortz,
-Daniel A. Messenger and Vanja Dukic, and are redistributed under the terms
-above with permission. Each file retains its original copyright header.

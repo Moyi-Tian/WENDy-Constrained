@@ -303,4 +303,4 @@ Further theoretical background on the model is given in:
 
 This project is licensed under the terms of the MIT license; see [`LICENSE`](LICENSE).
 
-The files in `src/` derive from [**MathBioCU/WENDy**](https://github.com/MathBioCU/WENDy), Copyright © 2023 D. M. Bortz, D. A. Messenger, and V. Dukic, and are redistributed here under the MIT license with permission. Each of those files keeps its original copyright header, with modifications noted as described in [`src/README.md`](src/README.md).
+The files in `src/` derive from [**MathBioCU/WENDy**](https://github.com/MathBioCU/WENDy), Copyright © 2023 D. M. Bortz, D. A. Messenger, and V. Dukic, and are redistributed here under the MIT license with permission; see [`NOTICE`](NOTICE). Each of those files keeps its original copyright header, with modifications noted as described in [`src/README.md`](src/README.md).

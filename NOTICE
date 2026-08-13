@@ -1,0 +1,6 @@
+The files in src/ derive from the WENDy implementation at
+https://github.com/MathBioCU/WENDy, Copyright (c) 2023 David M. Bortz,
+Daniel A. Messenger and Vanja Dukic, and are redistributed under the terms
+of the LICENSE file with permission. Each file retains its original
+copyright header, and every change is noted there; see src/README.md for
+the file-by-file account.
