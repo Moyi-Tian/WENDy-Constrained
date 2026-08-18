@@ -55,20 +55,14 @@ save_results = 1; % = 1 save inference; = 0 not save inference
 write_to_txt = 1; % = 1 write results to txt; = 0 do not write
 save_fig = 1; % = 1 save figure; = 0 not save figure
 
-%% set WENDy params
-
-%%% set-and-forget params
-wendy_snf_params;
-
-%%% set weak integration
-phifun = phifuns{1};                % defined in wendy_snf_params.m
-meth = 'mtmin';                     % 'mtmin','FFT','direct','timefrac'
-mt_params = 2.^(0:3);               % see get_rad.m
-K_max = 5000;
-K_min = length([equation_terms{:}]);
-mt_max = max(floor((M-1)/2)-K_min,1);
-mt_min = rad_select(tobs,xobs,phifun,1,submt,0,1,2,mt_max,[]);
-mt_cell = cellfun(@(x,y) [x,{y}], repmat({{phifun,meth}},length(mt_params),1),num2cell(mt_params(:)),'uni',0);
+%% WENDy arguments
+% wendy_default_args fills in every argument after the feature library, using
+% wendy_snf_params.m for the set-and-forget values and the same recipes the
+% original wendy_script.m uses for the derived ones. Any of them can be
+% overridden by name.
+[args,opts] = wendy_default_args(xobs,tobs,features, ...
+    'numeq',numeq,'S',S,'C',C);
+phifun = opts.phifun;   % the display scripts plot the test function
 
 %% post-processing options
 
@@ -82,9 +76,7 @@ toggle_ddd = 1;
 tic;
 [w_hat,res,res_0,w_hat_its,V_cell,Vp_cell,...
     Theta_cell,mt,xobs,Jac_mat,G_0,b_0,RT,stdW,mseW,CovW,S,C] = wendy_fcn(...
-    xobs,tobs,features,numeq,S,C,toggle_smooth,...
-    mt_cell,mt_min,mt_max,K_min,K_max,center_scheme,toggle_VVp_svd,...
-    w0,optim_params,iter_diff_tol,max_iter,diag_reg,pvalmin,check_pval_it);
+    xobs,tobs,features,args{:});
 total_time = toc;
 
 %% Save results

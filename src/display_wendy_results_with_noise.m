@@ -277,7 +277,7 @@ if toggle_plot
 
     %%% tidy the 3x3 grid: lift every title clear of the axes box and give the
     %%% panels a little more vertical room, so long titles are not cramped
-    %%% against the plot or clipped by the neighbouring subplot.
+    %%% against the plot or clipped by the neighboring subplot.
     all_ax = findobj(gcf,'Type','axes');
     for k = 1:numel(all_ax)
         all_ax(k).Title.Units    = 'normalized';

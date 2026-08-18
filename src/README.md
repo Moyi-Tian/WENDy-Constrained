@@ -7,7 +7,7 @@ This folder is derived from the WENDy implementation at [**MathBioCU/WENDy**](ht
 > *Bulletin of Mathematical Biology* **85**, 110 (2023).
 > [doi:10.1007/s11538-023-01208-6](https://doi.org/10.1007/s11538-023-01208-6)
 
-Every file keeps its original copyright header, and every change carries a note in that header describing it. The files with key changes are:
+Every upstream file keeps its original copyright header, and every change carries a note in that header describing it. The files with key changes are:
 
 | file | change |
 | :-- | :-- |
@@ -17,6 +17,8 @@ Every file keeps its original copyright header, and every change carries a note 
 | `get_Lfac.m` | takes `numeq` explicitly; indexes one shared feature library across all equations |
 | `get_RT.m` | removed a duplicated `chol()` call |
 | `wendy_snf_params.m` | test-function exponent renamed `eta` to `phi_eta` to avoid clobbering a model parameter of the same name |
+
+One file is new. `wendy_default_args.m` is written for this repository, not derived from upstream: it collects the package's default settings so `wendy_fcn`'s arguments don't need to be written out in full every time it is called. The values are `wendy_snf_params.m`'s, so behavior is unchanged.
 
 Elsewhere, the code is upstream's, apart from small bug fixes and typo corrections in `VVp_svd.m`, `wendy_opt.m` and `els.m`. Each change is commented where it occurs, and the file headers note that a fix was applied.
 

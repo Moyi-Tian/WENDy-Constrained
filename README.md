@@ -15,15 +15,16 @@ This repository extends WENDy with two ways to constrain the coefficients of an 
   - [Supported cases](#supported-cases)
 - [Running the Examples](#running-the-examples)
 - [Repository Structure](#repository-structure)
+- [Using It on Your Own Model](#using-it-on-your-own-model)
 - [Citation](#citation)
 - [License](#license)
 
 
 ## Relationship to WENDy
 
-This repository builds on the WENDy implementation from [**MathBioCU/WENDy**](https://github.com/MathBioCU/WENDy), by Bortz, Messenger, and Dukic (full reference under [Citation](#citation)). It is not a wrapper around that code: `src/` holds a modified copy of it, taken from the main branch as downloaded on April 3, 2025, with the constrained coefficient map built into the solver itself and the diagnostic routines adapted to match.
+This repository builds on the WENDy implementation from [**MathBioCU/WENDy**](https://github.com/MathBioCU/WENDy), by Bortz, Messenger, and Dukic (full reference under [Citation](#citation)). `src/` holds a modified copy of that code, taken from the main branch as downloaded on April 3, 2025, with the constrained coefficient map built into the solver itself and the diagnostic routines adapted to match.
 
-The two halves of the repository have different origins. Everything in `src/` is upstream code, some modified and some untouched. Everything else — the model definitions, the data generation, and the demo scripts — is original to this repository.
+The two halves of the repository have different origins. `src/` is upstream code, some modified and some untouched, plus one new file, `wendy_default_args.m`. Everything else — the model definitions, the data generation, and the demo scripts — is original to this repository.
 
 Every upstream file keeps its original copyright header, and each change is recorded in that header and commented where it occurs. [`src/README.md`](src/README.md) gives the file-by-file account.
 
@@ -62,7 +63,7 @@ with $U, E, D, P, R \in [0,1]$.
 
 β and θ both move individuals *U* → *E*, differing only in what drives the mass flow. The rate η couples the two layers: online engagement draws previously non-participating individuals into offline participation at rate η*E*, and by modeling assumption they leave online engagement at the same time, so the rate out of *E* is the combined η + γ<sub>i</sub>. Mass on both layers is conserved. Given that, and since the offline non-participating compartment is of no practical interest here, the model does not track it. More on the model's motivation and derivation can be found in [Tian, Brantingham, and Rodríguez (2026)](https://doi.org/10.1093/comnet/cnaf057), with further theoretical background in [Tian *et al.* (2026)](https://arxiv.org/abs/2605.30432).
 
-This system motivates **both features** of this package. First, the coefficient $-(\eta + \gamma_i)$ appears as a **sum**, so the same two parameters are tied together across the $\dot{E}$ and $\dot{D}$ equations. Second, several coefficients are related by sign or shared outright between equations, because mass leaving one compartment must enter another. An unconstrained solver cannot see any of that — **hence the structure matrix**. Lastly, as is common in epidemiological models, a practical situation is that some parameters are known while others are to be inferred from data — as in one of the demos below, where the recovery rates are treated as known. This is what the **offset vector** is for.
+This system motivates **both features** of this package. First, the coefficient $-(\eta + \gamma_i)$ appears as a **sum**, so the same two parameters are tied together across the $\dot{E}$ and $\dot{D}$ equations. Second, several coefficients are related by sign or shared outright between equations, because mass leaving one compartment must enter another. An unconstrained fit cannot see any of that — **hence the structure matrix**. Lastly, as is common in epidemiological models, a practical situation is that some parameters are known while others are to be inferred from data — as in one of the demos below, where the recovery rates are treated as known. This is what the **offset vector** is for.
 
 
 ## Constrained Coefficients: the Structure Matrix and the Offset Vector
@@ -233,9 +234,9 @@ InferPars_WithNoise_SparsityOnly             % sparsity only, with noise
 | `InferPars_WithNoise_Structured_with_Offset` | β, θ, η | σ<sub>NR</sub> = 0.05 |
 | `InferPars_WithNoise_SparsityOnly` | 9 coefficients, sparsity only | σ<sub>NR</sub> = 0.05 |
 
-The last is a counterexample rather than a demonstration, and it is why the constraints are worth setting up for this model. It runs on the same data as `InferPars_WithNoise_Structured` and with identical solver settings, but its $S$ carries only the sparsity — which feature appears in which equation — and none of the parameter tying or sign sharing. That is what the original WENDy is given, so running the two side by side shows what the tying and sign sharing add on top of the sparsity. It converges, but to roughly 16% relative error — nearly ten times worse than the structured demo on the same trajectories. On this model, therefore, the constrained formulation earns most of its gain from the tying and sign sharing rather than from the sparsity the original WENDy already supplies.
+The last is a counterexample rather than a demonstration, and it is why the constraints are worth setting up for this model. It runs on the same data as `InferPars_WithNoise_Structured` and with identical algorithm settings, but its $S$ carries only the sparsity — which feature appears in which equation — and none of the parameter tying or sign sharing. That is what the original WENDy is given, so running the two side by side shows what the tying and sign sharing add on top of the sparsity. It converges, but to roughly 16% relative error — nearly ten times worse than the structured demo on the same trajectories. On this model, therefore, the constrained formulation earns most of its gain from the tying and sign sharing rather than from the sparsity the original WENDy already supplies.
 
-Each script prints the estimated parameters against the true ones and produces the nine-panel WENDy diagnostic figure. In the four structured demos, the toggles `save_results`, `write_to_txt`, `save_fig` and `write_to_csv` near the top of each script control whether results, logs and figures are written to disk; the output folders are created automatically on first run. `InferPars_WithNoise_SparsityOnly` writes nothing.
+Each script prints the estimated parameters against the true ones and produces the nine-panel WENDy diagnostic figure. In the four structured demos, the toggles `save_results`, `write_to_txt`, and `save_fig` near the top of each script control whether results, logs, and figures are written to disk (the two noisy ones add `write_to_csv`); the output folders are created automatically on first run. `InferPars_WithNoise_SparsityOnly` writes nothing.
 
 The diagnostic figure follows the original WENDy code: the same nine panels, showing the iterate errors, confidence bounds, Shapiro–Wilk *p*-values, the data against the learned dynamics, the residual decomposition, and the Fourier content of the data and test functions. The panels here are adapted to the constrained setting — starred quantities account for the offset vector $C$, and the Jacobian is evaluated at the full coefficient vector $S\vec{\theta} + C$ — but the layout and the diagnostics themselves are unchanged, so the figure can be read exactly as in the original.
 
@@ -254,13 +255,33 @@ It is dimensionless, and $\sigma_X$ is computed separately for each state variab
 
 ## Repository Structure
 
-**`src/`** holds the core code: the constrained WENDy solver and the weak-form machinery it depends on. The entry point is `wendy_fcn.m`, which implements the constrained coefficient map $\vec{w} = S\vec{\theta} + C$ described above. Solver defaults live in `wendy_snf_params.m`, and the two `display_wendy_results_*.m` scripts build the diagnostic figure. The remaining files are test-function construction, covariance factors and utilities. Every file carries the original WENDy copyright header. The key changes are listed in `src/README.md`; elsewhere there are only small bug fixes and cosmetic changes that leave the main functionality intact, each noted in the file header and commented at the point of the change.
+**`src/`** holds the core code: the constrained WENDy solver and the weak-form machinery it depends on. The entry point is `wendy_fcn.m`, which implements the constrained coefficient map $\vec{w} = S\vec{\theta} + C$ described above. Default algorithm settings live in `wendy_snf_params.m` and are assembled by `wendy_default_args.m`, and the two `display_wendy_results_*.m` scripts build the diagnostic figure. The remaining files are test-function construction, covariance factors and utilities. Every file except `wendy_default_args.m`, which is new, carries the original WENDy copyright header. The key changes are listed in `src/README.md`; elsewhere there are only small bug fixes and cosmetic changes that leave the main functionality intact, each noted in the file header and commented at the point of the change.
 
 **`Generate_Data/`** produces the synthetic data the demos consume and must be run first. `FullyMixedModel_ODE.m` is the right-hand side of the model, while `Driver.m` and `Driver_noisy.m` simulate noise-free and noisy trajectories, respectively, and save them to `Generate_Data/data/`.
 
 **Model definitions.** `FullyMixedModel_Structured.m` supplies the feature library, equations and structure matrix $S$ for the five-parameter problem. `FullyMixedModel_Structured_with_Offset.m` supplies $S$ and the offset vector $C$ for the three-parameter problem, in which $\gamma_i$ and $\gamma_p$ are treated as known.
 
-**Demonstrations.** The `InferPars_*.m` scripts in the repository root are the worked examples, covering the structure matrix alone and the structure matrix with offsets, each without and with noise, together with one unconstrained run for contrast.
+**Demonstrations.** The `InferPars_*.m` scripts in the repository root are the worked examples, covering the structure matrix alone and the structure matrix with offsets, each without and with noise, together with one sparsity-only run for contrast.
+
+
+## Using It on Your Own Model
+
+Most of `wendy_fcn`'s arguments are algorithm settings shared across examples. These are provided in WENDy's original `wendy_snf_params.m`. To make the usage of this package more convenient, such settings are handled in the helper function [`src/wendy_default_args.m`](src/wendy_default_args.m), so a complete call is two lines:
+
+```matlab
+[args, opts] = wendy_default_args(xobs, tobs, features, 'S', S, 'C', C);
+[w_hat, ...] = wendy_fcn(xobs, tobs, features, args{:});
+```
+
+Omit `'S'` and `'C'` to leave every coefficient free — see [Supported cases](#supported-cases) for what that does and does not mean — and override any individual setting by name:
+
+```matlab
+[args, opts] = wendy_default_args(xobs, tobs, features, 'S', S, 'toggle_smooth', 1);
+```
+
+The second output `opts` holds every resolved setting, including the derived `opts.K_min`, `opts.mt_min`, and `opts.mt_max`.
+
+**Note.** This package only applies to systems of ODEs. PDE problems such as reaction–diffusion or transport are outside its scope. Also, $S$ is a linear map, so it expresses only relationships that are linear in the parameters — sharing, sign flips, sums, and so on — not coefficients that are products or ratios of them, as in FitzHugh–Nagumo's $\dot{w} = (v + a - bw)/c$.
 
 
 ## Citation
