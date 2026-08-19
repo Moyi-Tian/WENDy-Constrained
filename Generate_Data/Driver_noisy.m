@@ -24,6 +24,9 @@ t_num = 100;
 
 sigma = 0.05; % noise ratio: additive Gaussian noise std as a fraction of each state's RMS amplitude
 
+rng_seed = 123;  % fixed so the noisy data, and therefore the demo results, are
+rng(rng_seed); % reproducible; set rng('shuffle') for a fresh realization
+
 save_data = 1; % = 1 save simulation data; = 0 not save data
 
 %% Initialization
