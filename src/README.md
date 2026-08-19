@@ -7,7 +7,7 @@ This folder is derived from the WENDy implementation at [**MathBioCU/WENDy**](ht
 > *Bulletin of Mathematical Biology* **85**, 110 (2023).
 > [doi:10.1007/s11538-023-01208-6](https://doi.org/10.1007/s11538-023-01208-6)
 
-Every upstream file keeps its original copyright header, and every change carries a note in that header describing it. The files with key changes are:
+Every upstream file keeps its copyright header, and any modified file includes a note at the top describing what changed; a few are third-party and carry their own, as recorded in `NOTICE`. The files with key changes are:
 
 | file | change |
 | :-- | :-- |
