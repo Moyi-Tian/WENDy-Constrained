@@ -22,6 +22,17 @@ keywords:
   - structure matrix
   - MATLAB
 references:
+  - type: software
+    title: WENDy
+    authors:
+      - family-names: Bortz
+        given-names: David M.
+      - family-names: Messenger
+        given-names: Daniel A.
+      - family-names: Dukic
+        given-names: Vanja
+    repository-code: "https://github.com/MathBioCU/WENDy"
+    notes: "Upstream implementation from which the files in src/ derive."
   - type: article
     title: "Direct Estimation of Parameters in ODE Models Using WENDy: Weak-Form Estimation of Nonlinear Dynamics"
     authors:
@@ -52,3 +63,22 @@ references:
     issue: 2
     year: 2026
     doi: 10.1093/comnet/cnaf057
+  - type: article
+    status: preprint
+    title: "Learning effective models from network dynamics data with multiple initial conditions using weak form SINDy"
+    authors:
+      - family-names: Tian
+        given-names: Moyi
+        orcid: "https://orcid.org/0000-0001-8166-7410"
+      - family-names: Messenger
+        given-names: Daniel A.
+      - family-names: Dukic
+        given-names: Vanja
+      - family-names: Rodríguez
+        given-names: Nancy
+        orcid: "https://orcid.org/0000-0003-1023-9659"
+      - family-names: Bortz
+        given-names: David M.
+    year: 2026
+    doi: 10.48550/arXiv.2605.30432
+    url: "https://arxiv.org/abs/2605.30432"
