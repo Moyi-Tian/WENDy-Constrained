@@ -286,17 +286,20 @@ The second output `opts` holds every resolved setting, including the derived `op
 
 ## Citation
 
-If you use the code in this repository, please cite this GitHub page:
+If you use the code in this repository, please cite it as software:
 
 ```bibtex
-@misc{tian2026wendyconstrained,
-  author       = {Tian, Moyi},
-  title        = {{WENDy-Constrained}},
-  year         = {2026},
-  howpublished = {\url{https://github.com/Moyi-Tian/WENDy-Constrained}},
-  note         = {GitHub repository}
+@software{tian2026wendyconstrained,
+  author    = {Tian, Moyi},
+  title     = {{WENDy-Constrained}},
+  year      = {2026},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.22006935},
+  url       = {https://github.com/Moyi-Tian/WENDy-Constrained}
 }
 ```
+
+The DOI above resolves to the latest release; each release also has its own version-specific DOI on [Zenodo](https://doi.org/10.5281/zenodo.22006935).
 
 The code is based on [**MathBioCU/WENDy**](https://github.com/MathBioCU/WENDy), which accompanies:
 
