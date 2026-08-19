@@ -291,7 +291,7 @@ If you use the code in this repository, please cite it as software:
 ```bibtex
 @software{tian2026wendyconstrained,
   author    = {Tian, Moyi},
-  title     = {{WENDy-Constrained}},
+  title     = {{WENDy-Constrained: Weak-Form Parameter Estimation with a Structure Matrix and an Offset Vector for Constrained ODE Coefficients}},
   year      = {2026},
   publisher = {Zenodo},
   doi       = {10.5281/zenodo.22006935},
