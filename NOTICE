@@ -1,6 +1,14 @@
 The files in src/ derive from the WENDy implementation at
-https://github.com/MathBioCU/WENDy, Copyright (c) 2023 David M. Bortz,
-Daniel A. Messenger and Vanja Dukic, and are redistributed under the terms
-of the LICENSE file with permission. Each file retains its original
-copyright header, and every change is noted there; see src/README.md for
-the file-by-file account.
+https://github.com/MathBioCU/WENDy, Copyright (c) 2023 David M. Bortz, Daniel
+A. Messenger and Vanja Dukic, and are redistributed under the terms of the
+LICENSE file with permission. Each retains its original copyright header where
+it has one, and any modified file says at the top what changed; see
+src/README.md for the file-by-file account.
+
+Two of those files are third-party code incorporated by WENDy itself,
+redistributed here exactly as they appear upstream, with their original
+headers: swtest.m, Copyright (c) 2009 Ahmed Ben Saïda; and fdcoeffF.m, from
+R. J. LeVeque's Finite Difference Methods for Ordinary and Partial
+Differential Equations (SIAM, 2007), now at
+https://faculty.washington.edu/rjl/fdmbook/. Their authors are not parties to
+the permission described above.
