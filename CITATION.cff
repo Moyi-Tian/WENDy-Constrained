@@ -3,6 +3,9 @@ message: "If you use this software, please cite it as below."
 title: WENDy-Constrained
 abstract: "Weak-form parameter estimation (WENDy) extended with a structure matrix and an offset vector, so that the coefficients of an ODE system can be tied together, fixed to known values, or both. Demonstrated on the fully-mixed two-layer online-offline engagement model."
 type: software
+version: 1.0.0
+doi: "10.5281/zenodo.22006935"
+date-released: 2026-08-18
 authors:
   - family-names: Tian
     given-names: Moyi
